@@ -40,14 +40,15 @@ wp-nuxt-api-demo/
 │  └─ images/
 ├─ frontend/
 │  ├─ app/
-│  │  ├─ app.vue
-│  │  ├─ error.vue
+│  │  ├─ assets/
 │  │  ├─ components/
 │  │  ├─ composables/
 │  │  ├─ layouts/
 │  │  ├─ pages/
 │  │  ├─ types/
-│  │  └─ utils/
+│  │  ├─ utils/
+│  │  ├─ app.vue
+│  │  └─ error.vue
 │  ├─ public/
 │  ├─ nuxt.config.ts
 │  ├─ package.json
