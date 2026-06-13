@@ -22,6 +22,7 @@ logs
 /app/
 /conf/
 /logs/
+/wp/
 
 # Local env files
 .env
