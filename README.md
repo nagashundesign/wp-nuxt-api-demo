@@ -1,6 +1,30 @@
 # WordPress Nuxt Demo
 
-WordPressをCMSとして使い、Nuxt.js + TypeScriptで記事一覧・記事詳細・カテゴリ絞り込み・検索・ページネーションを表示する学習用デモです。
+WordPressをCMSとして利用し、Nuxt 4 + TypeScriptでフロントエンドを構築した学習用デモです。
+
+WordPress REST APIから投稿・カテゴリーを取得し、記事一覧、記事詳細、カテゴリー絞り込み、キーワード検索、ページネーションなどを実装しています。
+
+## 公開URL
+
+### Nuxtフロントエンド
+
+https://wp-nuxt-demo.nagashun.jp/
+
+Cloudflare Pagesへデプロイした公開デモです。
+
+### WordPress CMS / REST API
+
+https://nagashun.jp/wp-nuxt-demo/
+
+WordPress側では、投稿やカテゴリーなどのコンテンツを管理しています。
+
+REST API確認用URL：
+
+https://nagashun.jp/wp-nuxt-demo/wp-json/wp/v2/posts
+
+> 公開されている記事やカテゴリーは、動作確認用のサンプルデータです。
+
+## 画面イメージ
 
 ### トップページ
 
@@ -10,27 +34,55 @@ WordPressをCMSとして使い、Nuxt.js + TypeScriptで記事一覧・記事詳
 
 <img src="docs/images/search.jpg" alt="検索結果" width="380">
 
-
 ## 概要
 
-このプロジェクトでは、WordPress REST APIから投稿データを取得し、Nuxt側でフロント画面を構築しています。
-WordPress側では記事やカテゴリを管理し、Nuxt側では取得したデータをもとに以下の画面を表示します。
+このプロジェクトでは、WordPressをヘッドレスCMSとして利用し、REST APIから取得したデータをNuxt側で表示しています。
+
+WordPress側は記事やカテゴリーの管理を担当し、Nuxt側では取得したデータをもとに以下の機能を提供します。
 
 - 記事一覧ページ
 - 記事詳細ページ
-- カテゴリ別記事一覧ページ
+- カテゴリー別記事一覧ページ
 - キーワード検索
 - ページネーション
-- SEO情報設定
-- 404 / エラー画面
+- URLクエリによる検索・絞り込み状態の管理
+- ページごとのSEO情報設定
+- 404・API取得エラーへの対応
+
+## 本番環境の構成
+
+```txt
+GitHub
+└─ Nuxtのソースコードを管理
+   └─ mainブランチへのpushで自動デプロイ
+
+Cloudflare Pages
+└─ Nuxtフロントエンド
+   └─ https://wp-nuxt-demo.nagashun.jp/
+
+ロリポップ
+└─ WordPress / REST API
+   └─ https://nagashun.jp/wp-nuxt-demo/
+```
+
+Nuxt側では、Cloudflare Pagesに設定した環境変数を通して、公開中のWordPress REST APIへ接続しています。
+
+```env
+NUXT_PUBLIC_WP_API_BASE_URL=https://nagashun.jp/wp-nuxt-demo
+```
 
 ## 使用技術
 
 - Vue.js
-- Nuxt.js
+- Nuxt 4
 - TypeScript
 - WordPress REST API
+- Cloudflare Pages
+- GitHub
+- Node.js
+- npm
 - Local
+- ロリポップ
 
 ## ディレクトリ構成
 
@@ -51,6 +103,7 @@ wp-nuxt-api-demo/
 │  │  └─ error.vue
 │  ├─ public/
 │  ├─ nuxt.config.ts
+│  ├─ package-lock.json
 │  ├─ package.json
 │  └─ tsconfig.json
 ├─ .gitignore
@@ -59,35 +112,34 @@ wp-nuxt-api-demo/
 
 ## 起動方法
 
-### 1. WordPressを起動する
+公開中のWordPress REST APIを利用する場合は、ローカルでWordPressを起動せずに動作確認できます。
 
-LocalでWordPressサイトを起動します。
-WordPress REST APIが表示できることを確認します。
+### 1. `frontend`ディレクトリへ移動する
 
-```txt
-http://localhost:10005/wp-json/wp/v2/posts?per_page=3
+```powershell
+cd frontend
 ```
 
-### 2. .envを作成する
+### 2. `.env`を作成する
 
-`.env`を作成し、WordPress REST APIのベースURLを設定します。
+`frontend`ディレクトリ直下に`.env`を作成し、WordPressのベースURLを設定します。
 
 ```env
-NUXT_PUBLIC_WP_API_BASE_URL=http://localhost:10005
+NUXT_PUBLIC_WP_API_BASE_URL=https://nagashun.jp/wp-nuxt-demo
 ```
 
-.envはGit管理から除いていますが、学習目的であることと機密情報ではないため掲載しています。
+`.env`はGit管理から除外しています。READMEには設定例のみを掲載しており、APIキーなどの機密情報は含んでいません。
 
 ### 3. 依存関係をインストールする
 
-```bash
-npm install
+```powershell
+npm ci
 ```
 
 ### 4. 開発サーバーを起動する
 
-```bash
-npx nuxi dev --host 127.0.0.1 --port 3001 -o
+```powershell
+npm run dev -- --host 127.0.0.1 --port 3001 -o
 ```
 
 ### 5. ブラウザで確認する
@@ -96,64 +148,80 @@ npx nuxi dev --host 127.0.0.1 --port 3001 -o
 http://127.0.0.1:3001/
 ```
 
-## 学習ポイント
+### ローカルのWordPressを利用する場合
 
-このデモではWordPress REST APIとNuxt.jsを組み合わせた小規模なHeadless WordPress風サイトを作成しています。
+LocalでWordPressサイトを起動し、REST APIへアクセスできることを確認します。
 
-主な学習ポイントは以下です。
+以下はポート番号が`10005`の場合の例です。実際のURLはLocalのサイト設定に合わせて変更してください。
 
-### Nuxtの基本構成
+```txt
+http://localhost:10005/wp-json/wp/v2/posts?per_page=3
+```
 
-- `app.vue`をアプリ全体の入口として使う
-- `pages`でページを作る
-- `layouts`で共通レイアウトを作る
-- `components`でUI部品を分ける
-- `composables`で処理を分離する
-- `types`でTypeScriptの型定義をまとめる
-- `utils`で汎用関数を管理する
+この場合は、`.env`もローカルのWordPress URLへ変更します。
 
-### WordPress REST API連携
+```env
+NUXT_PUBLIC_WP_API_BASE_URL=http://localhost:10005
+```
 
-- WordPressの投稿一覧をREST APIから取得する
-- 投稿IDをもとに記事詳細を取得する
-- カテゴリ一覧を取得する
-- カテゴリIDを使って記事を絞り込む
-- WordPress APIのレスポンスにTypeScriptの型を付ける
+## デプロイ
 
-### Vue / Nuxtの実装理解
+Nuxtフロントエンドは、GitHubリポジトリとCloudflare Pagesを連携して公開しています。
 
-- `useFetch`でAPIデータを取得する
-- `ref`で変化する値を管理する
-- `computed`で表示用データを作る
-- `props`で親から子へデータを渡す
-- `emit`で子から親へイベントを伝える
-- `v-for`で一覧を繰り返し表示する
-- `v-if`/ `v-else-if`/ `v-else`で状態に応じた表示を切り替える
-- `NuxtLink`でページ遷移を行う
+`main`ブランチへpushすると、Cloudflare Pagesで自動的にビルド・デプロイされます。
 
-### URLクエリ管理
+主なビルド設定は以下のとおりです。
 
-- `useRoute`で現在のURL情報を取得する
-- `useRouter`でURLを変更する
-- `?search=キーワード`で検索状態を管理する
-- `?category=カテゴリID`でカテゴリ条件を管理する
-- `?page=ページ番号`でページ番号を管理する
-- URLを再読み込みしても検索・絞り込み状態が残るようにする
+| 項目 | 設定値 |
+| --- | --- |
+| Production branch | `main` |
+| Root directory | `frontend` |
+| Build command | `npm run build` |
 
-### 実務寄りの整理
+Cloudflare Pagesには、次の環境変数を設定しています。
 
-- API取得処理を`composables`に分離する
-- 型定義を`types`にまとめる
-- 日付整形やHTMLテキスト化を`utils`に分ける
-- 検索フォーム、カテゴリ一覧、ページネーション、メッセージ表示をコンポーネント化する
-- 共通CSSを`assets/css/main.css`にまとめる
-- エラー画面を`error.vue`で用意する
-- `useSeoMeta`でページごとのtitle / descriptionを設定する
+```env
+NUXT_PUBLIC_WP_API_BASE_URL=https://nagashun.jp/wp-nuxt-demo
+```
+
+公開後はカスタムドメインを設定し、次のURLで配信しています。
+
+```txt
+https://wp-nuxt-demo.nagashun.jp/
+```
+
+## 実装・公開で経験したこと
+
+このデモでは、WordPress REST APIとNuxtを組み合わせた小規模なヘッドレスCMS構成を実装しています。
+
+### フロントエンド実装
+
+- WordPress REST APIを利用した投稿・カテゴリー取得
+- NuxtとTypeScriptによるフロントエンド実装
+- `components` / `composables` / `types` / `utils`への分離
+- URLクエリによる検索・絞り込み・ページ番号管理
+- ページごとのSEO情報設定
+- 404・取得エラーへの対応
+
+### 開発・デプロイ
+
+- GitHubによるソースコード管理と`main`ブランチ連携
+- npmによる依存関係管理
+- Cloudflare PagesでNuxtをビルド・公開
+- GitHub連携による自動デプロイ
+- 本番環境における環境変数の設定
+
+### 公開環境・構成
+
+- エックスサーバードメインでのドメイン管理
+- DNS管理をCloudflareへ移行
+- ロリポップでWordPressを運用
+- Nuxt用サブドメインの割り当て
+- カスタムドメインとSSLの設定
+- WordPressとNuxtを異なる環境で公開する構成
 
 ## 制作目的
 
-WordPressの知見があるため、それを活かしたフロントエンド開発をしたいと思い、WordPressをCMSとして利用し、Nuxt.js + TypeScriptでフロントエンドを構築する構成を学習するために制作しました。
-
-WordPress側では投稿・カテゴリなどのコンテンツ管理を担当し、Nuxt側ではREST APIから取得したデータをもとに画面表示を行います。
-
-WordPressの管理画面を活かしつつ、フロントエンド側はVue / Nuxtのコンポーネント設計、ルーティング、検索、ページネーション、SEO設定などを分離して実装できます。
+これまでに培ったWordPressの知見を活かしながら、Vue.js / Nuxtを使ったフロントエンド開発を学ぶために制作しました。
+WordPress側では投稿やカテゴリーなどのコンテンツ管理を担当し、Nuxt側ではREST APIから取得したデータをもとに画面を構築しています。
+WordPressの管理画面を活かしつつ、フロントエンド側ではコンポーネント設計、ルーティング、検索、ページネーション、SEO設定などを役割ごとに分離して実装しています。
